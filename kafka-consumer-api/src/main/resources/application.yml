@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: kafka-consumer-api
+  kafka:
+    bootstrap-servers: localhost:9092
+  datasource:
+    url: jdbc:h2:file:./data/taxibornesdb
+    driverClassName: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+server:
+  port: 8080
+
+kafka:
+  topic: taxi-borne-topic
+
+springdoc:
+  api-docs:
+    enabled: true
+  swagger-ui:
+    path: /swagger-ui.html
