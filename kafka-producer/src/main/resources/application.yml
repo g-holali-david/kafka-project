@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: kafka-producer-service
+stations:
+  data-folder: ${STATIONS_TAXI_DATA}/project-data
+  raw-kafka-topic: taxi-stations.raw
+  kafka-server: localhost:9092
+  sync-sending: true

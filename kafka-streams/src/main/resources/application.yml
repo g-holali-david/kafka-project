@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: kafka-streams
+  kafka:
+    bootstrap-servers: localhost:9092
+    streams:
+      application-id: taxi-streams-app
+      properties:
+        commit.interval.ms: 1000
+
+kafka:
+  input-topic: taxi-borne-topic
+  output-topic: taxi-borne-aggregated
+

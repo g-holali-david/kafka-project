@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "csv.filepath",
+      "type": "java.lang.String",
+      "description": "Description for csv.filepath."
+  }
+] }
