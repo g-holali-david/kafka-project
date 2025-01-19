@@ -15,10 +15,10 @@ cd C:\kafka
 
 .\bin\windows\kafka-topics.bat --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic taxi-stations.raw
 
-#verify
+# Verify
 .\bin\windows\kafka-topics.bat --list --bootstrap-server localhost:9092
 
-#lisst all topic
+# Lisst all topic
 .\bin\windows\kafka-topics.bat --list --bootstrap-server localhost:9092
 
 # Write in a topic
