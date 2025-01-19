@@ -3,6 +3,7 @@ Map api : AIzaSyA64YnSfEC8vSF_LkN5VpTXVpHn5WmEKNM
 
 # Start servers
 .\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties
+\
 .\bin\windows\kafka-server-start.bat .\config\server.properties
 
 # Verify ports
@@ -13,7 +14,7 @@ netstat -ano | findstr :9092
 
 # Create a topic
 cd C:\kafka
-
+\
 .\bin\windows\kafka-topics.bat --create --bootstrap-server localhost:9092 --replication-factor 1 --partitions 1 --topic taxi-stations.raw
 
 # Verify
