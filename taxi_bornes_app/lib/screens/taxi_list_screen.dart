@@ -73,9 +73,6 @@ class _TaxiListScreenState extends State<TaxiListScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Stations de Taxis'),
-      ),
       body: SafeArea(
         child: CustomScrollView(
           slivers: <Widget>[
@@ -213,8 +210,14 @@ class _TaxiListScreenState extends State<TaxiListScreen> {
                     children: [
                       ElevatedButton.icon(
                         onPressed: currentPage > 0 ? _goToPreviousPage : null,
-                        icon: const Icon(Icons.arrow_back),
-                        label: const Text('Précédent'),
+                        icon: const Icon(
+                          Icons.arrow_back,
+                          color: Colors.white,
+                        ),
+                        label: const Text(
+                          'Précédent',
+                          style: TextStyle(color: Colors.white),
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
                           shape: RoundedRectangleBorder(
@@ -225,15 +228,26 @@ class _TaxiListScreenState extends State<TaxiListScreen> {
                       SizedBox(
                         width: 10.0,
                       ),
-                      Text('Page ${currentPage + 1} / $totalPages'),
+                      Text(
+                        'Page ${currentPage + 1} / $totalPages',
+                        style: TextStyle(
+                            color: Colors.blueAccent,
+                            fontWeight: FontWeight.bold),
+                      ),
                       SizedBox(
                         width: 10.0,
                       ),
                       ElevatedButton.icon(
                         onPressed:
                             currentPage < totalPages - 1 ? _goToNextPage : null,
-                        icon: const Icon(Icons.arrow_forward),
-                        label: const Text('Suivant'),
+                        icon: const Icon(
+                          Icons.arrow_forward,
+                          color: Colors.white,
+                        ),
+                        label: const Text(
+                          'Suivant',
+                          style: TextStyle(color: Colors.white),
+                        ),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue,
                           shape: RoundedRectangleBorder(
