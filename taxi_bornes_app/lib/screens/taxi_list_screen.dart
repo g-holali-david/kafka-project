@@ -12,13 +12,11 @@ class TaxiListScreen extends StatefulWidget {
 }
 
 class _TaxiListScreenState extends State<TaxiListScreen> {
+  final SearchController _searchController = SearchController();
   List<Station> stations = [];
   int currentPage = 0;
-  int totalPages = 1; // Nombre total de pages
+  int totalPages = 1;
   bool isLoading = false;
-  String searchTerm = "";
-
-  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -34,14 +32,15 @@ class _TaxiListScreenState extends State<TaxiListScreen> {
     });
 
     try {
-      final newStations = await ApiService.fetchStations(
+      final fetchedStations = await ApiService.fetchStations(
         page: currentPage,
         size: 5,
         query: query,
       );
+
       setState(() {
-        stations = newStations;
-        totalPages = 10; // Ajustez selon votre API
+        stations = fetchedStations;
+        totalPages = 10; // Ajustez cette valeur en fonction de l'API
       });
     } catch (e) {
       ScaffoldMessenger.of(context)
@@ -53,20 +52,12 @@ class _TaxiListScreenState extends State<TaxiListScreen> {
     }
   }
 
-  void _searchStations(String query) {
-    setState(() {
-      currentPage = 0;
-      searchTerm = query;
-    });
-    _fetchStations(query: query);
-  }
-
   void _goToNextPage() {
     if (currentPage < totalPages - 1) {
       setState(() {
         currentPage++;
       });
-      _fetchStations(query: searchTerm);
+      _fetchStations();
     }
   }
 
@@ -75,90 +66,188 @@ class _TaxiListScreenState extends State<TaxiListScreen> {
       setState(() {
         currentPage--;
       });
-      _fetchStations(query: searchTerm);
+      _fetchStations();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Stations de Taxis')),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                labelText: 'Rechercher une station',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
+      appBar: AppBar(
+        title: const Text('Stations de Taxis'),
+      ),
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: <Widget>[
+            SliverAppBar(
+              floating: true,
+              title: SearchAnchor.bar(
+                searchController: _searchController,
+                barLeading: Icon(
+                  Icons.search,
+                  color: Colors.blue, // Icône de recherche en bleu
                 ),
-                suffixIcon: IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () => _searchStations(_searchController.text),
+                barTrailing: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.close,
+                      color: Colors.blue, // Icône de fermeture en bleu
+                    ),
+                    onPressed: () {
+                      _searchController.clear();
+                    },
+                  ),
+                ],
+                barHintText: 'Rechercher une station...',
+                barTextStyle: WidgetStateProperty.all(
+                  TextStyle(color: Colors.blue.shade900, fontSize: 16),
+                ),
+                barShape: WidgetStateProperty.all(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                barElevation: WidgetStateProperty.all(4), // Ombre pour la barre
+                barOverlayColor: WidgetStateProperty.all(
+                  Colors.blue.withOpacity(0.1),
+                ),
+                onChanged: (query) {
+                  _fetchStations(query: query);
+                },
+                suggestionsBuilder:
+                    (BuildContext context, SearchController controller) {
+                  final query = controller.text;
+
+                  if (query.isEmpty) {
+                    return const [
+                      ListTile(
+                        titleAlignment: ListTileTitleAlignment.center,
+                        title: Text('Aucun résultat'),
+                      ),
+                    ];
+                  }
+
+                  final filteredStations = stations
+                      .where((station) => station.name
+                          .toLowerCase()
+                          .contains(query.toLowerCase()))
+                      .toList();
+
+                  return filteredStations.map((station) {
+                    return ListTile(
+                      tileColor: Colors.white,
+                      title: Text(
+                        station.name,
+                        style: const TextStyle(color: Colors.black),
+                      ),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                StationDetailScreen(station: station),
+                          ),
+                        );
+                      },
+                    );
+                  }).toList();
+                },
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : ListView.builder(
+                      physics: const NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: stations.length,
+                      itemBuilder: (context, index) {
+                        final station = stations[index];
+                        return Card(
+                          elevation: 2,
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 8, horizontal: 16),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: ListTile(
+                            leading: Icon(
+                              Icons.local_taxi,
+                              color: Colors.blue,
+                              size: 32,
+                            ),
+                            title: Text(
+                              station.name,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Text(station.address),
+                            trailing: Icon(
+                              Icons.arrow_forward_ios,
+                              color: Colors.grey,
+                              size: 16,
+                            ),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      StationDetailScreen(station: station),
+                                ),
+                              );
+                            },
+                          ),
+                        );
+                      },
+                    ),
+            ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: currentPage > 0 ? _goToPreviousPage : null,
+                        icon: const Icon(Icons.arrow_back),
+                        label: const Text('Précédent'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                      SizedBox(
+                        width: 10.0,
+                      ),
+                      Text('Page ${currentPage + 1} / $totalPages'),
+                      SizedBox(
+                        width: 10.0,
+                      ),
+                      ElevatedButton.icon(
+                        onPressed:
+                            currentPage < totalPages - 1 ? _goToNextPage : null,
+                        icon: const Icon(Icons.arrow_forward),
+                        label: const Text('Suivant'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              onSubmitted: (value) => _searchStations(value),
             ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: stations.length,
-              itemBuilder: (context, index) {
-                final station = stations[index];
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            StationDetailScreen(station: station),
-                      ),
-                    );
-                  },
-                  child: Container(
-                    color: index % 2 == 0 ? Colors.grey[200] : Colors.white,
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          station.name,
-                          style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          station.address,
-                          style: const TextStyle(fontSize: 14),
-                        ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ElevatedButton(
-                  onPressed: currentPage > 0 ? _goToPreviousPage : null,
-                  child: const Text('Précédent'),
-                ),
-                Text('Page ${currentPage + 1} / $totalPages'),
-                ElevatedButton(
-                  onPressed:
-                      currentPage < totalPages - 1 ? _goToNextPage : null,
-                  child: const Text('Suivant'),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
