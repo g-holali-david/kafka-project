@@ -26,11 +26,11 @@ cd C:\kafka
 
 
 
-# consumer in a topic 
+# Consume data in a topic
 .\bin\windows\kafka-console-consumer.bat --bootstrap-server localhost:9092 --topic taxi-stations.raw
 
 
-
+# Delete a topic
 .\bin\windows\kafka-topics.bat --bootstrap-server localhost:9092 --delete --topic taxi-stations.raw
-
+# Verify if deleted
 .\bin\windows\kafka-topics.bat --bootstrap-server localhost:9092 --list
