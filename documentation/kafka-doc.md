@@ -7,6 +7,7 @@ Map api : AIzaSyA64YnSfEC8vSF_LkN5VpTXVpHn5WmEKNM
 
 # Verify ports
 netstat -ano | findstr :2181
+\
 netstat -ano | findstr :9092
 
 
