@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:taxi_bornes_app/model/station.dart';
-import 'package:taxi_bornes_app/service/api_service.dart';
-import 'taxi_list_screen.dart';
+
+import '../models/station.dart';
+import '../services/api_service.dart';
 import 'map_screen.dart';
+import 'taxi_list_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -23,14 +24,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _fetchStations() async {
     try {
-      final fetchedStations = await ApiService.fetchStations(0, 50);
+      final fetchedStations = await ApiService.fetchStations(
+        page: 0,
+        size: 50,
+      );
       setState(() {
         stations = fetchedStations;
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error loading stations: $e')),
-      );
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Erreur : $e')));
     }
   }
 
@@ -38,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     final List<Widget> _screens = [
       const TaxiListScreen(),
-      MapScreen(stations: stations), // Pass the stations list here
+      MapScreen(stations: stations),
     ];
 
     return Scaffold(

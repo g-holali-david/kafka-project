@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:taxi_bornes_app/model/station.dart';
-
+import 'package:taxi_bornes_app/models/station.dart';
 
 class StationDetailScreen extends StatelessWidget {
   final Station station;
@@ -22,15 +21,20 @@ class StationDetailScreen extends StatelessWidget {
               style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            Text('Address: ${station.address}', style: const TextStyle(fontSize: 16)),
+            Text('Address: ${station.address}',
+                style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 8),
-            Text('INSEE: ${station.insee}', style: const TextStyle(fontSize: 16)),
+            Text('INSEE: ${station.insee}',
+                style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 8),
-            Text('Emplacements: ${station.emplacements}', style: const TextStyle(fontSize: 16)),
+            Text('Emplacements: ${station.emplacements}',
+                style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 8),
-            Text('Status: ${station.status}', style: const TextStyle(fontSize: 16)),
+            Text('Status: ${station.status}',
+                style: const TextStyle(fontSize: 16)),
             const SizedBox(height: 16),
-            const Text('Coordinates:', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text('Coordinates:',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             Text('Latitude: ${station.latitude}'),
             Text('Longitude: ${station.longitude}'),
           ],
