@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS taxi_stations (
     id VARCHAR(255),
-    PRIMARY KEY (id(100)),
+    PRIMARY KEY (id),
     name VARCHAR(255),
     insee VARCHAR(255),
     address VARCHAR(255),
