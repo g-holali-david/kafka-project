@@ -15,7 +15,8 @@ public class KafkaConsumerApiApplication {
 		SpringApplication app = new SpringApplication(KafkaConsumerApiApplication.class);
 		ConfigurableEnvironment env = new StandardEnvironment();
 
-		// Retrieve MySQL properties from environment variables or application properties
+		// Retrieve MySQL properties from environment variables or application
+		// properties
 		String mysqlUrl = env.getProperty("spring.datasource.url", "jdbc:mysql://localhost:3306/taxi_db");
 		String mysqlUser = env.getProperty("spring.datasource.username");
 		String mysqlPassword = env.getProperty("spring.datasource.password");

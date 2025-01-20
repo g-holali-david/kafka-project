@@ -45,7 +45,12 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Taxi Stations')),
+      appBar: AppBar(
+          title: const Column(
+        children: [
+          Text('Taxi Stations'),
+        ],
+      )),
       body: _screens[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,

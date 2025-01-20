@@ -80,13 +80,13 @@ class _TaxiListScreenState extends State<TaxiListScreen> {
               floating: true,
               title: SearchAnchor.bar(
                 searchController: _searchController,
-                barLeading: Icon(
+                barLeading: const Icon(
                   Icons.search,
                   color: Colors.blue, // Icône de recherche en bleu
                 ),
                 barTrailing: [
                   IconButton(
-                    icon: Icon(
+                    icon: const Icon(
                       Icons.close,
                       color: Colors.blue, // Icône de fermeture en bleu
                     ),
@@ -104,7 +104,7 @@ class _TaxiListScreenState extends State<TaxiListScreen> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                barElevation: WidgetStateProperty.all(4), // Ombre pour la barre
+                barElevation: WidgetStateProperty.all(4),
                 barOverlayColor: WidgetStateProperty.all(
                   Colors.blue.withOpacity(0.1),
                 ),
@@ -119,7 +119,13 @@ class _TaxiListScreenState extends State<TaxiListScreen> {
                     return const [
                       ListTile(
                         titleAlignment: ListTileTitleAlignment.center,
-                        title: Text('Aucun résultat'),
+                        title: Text(
+                          'Aucun résultat',
+                          style: TextStyle(
+                            color: Colors.blue,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ];
                   }
@@ -132,10 +138,10 @@ class _TaxiListScreenState extends State<TaxiListScreen> {
 
                   return filteredStations.map((station) {
                     return ListTile(
-                      tileColor: Colors.white,
+                      tileColor: Colors.blueAccent,
                       title: Text(
-                        station.name,
-                        style: const TextStyle(color: Colors.black),
+                        '${station.name} : ${station.address}',
+                        style: const TextStyle(color: Colors.white),
                       ),
                       onTap: () {
                         Navigator.push(
@@ -150,6 +156,10 @@ class _TaxiListScreenState extends State<TaxiListScreen> {
                   }).toList();
                 },
               ),
+            ),
+            SliverToBoxAdapter(
+              child: SizedBox(
+                  height: 16), // Espace de 16 pixels sous la barre de recherche
             ),
             SliverToBoxAdapter(
               child: isLoading
