@@ -78,10 +78,15 @@ mvn spring-boot:run
 ```
 
 #### Application Flutter
-```bash
+
+```bash Linux
 cd flutter-app
-.\runner.bat #Windows
-./runner.sh  #Linux
+./runner.sh 
+```
+
+```bash indows
+cd flutter-app
+.\runner.bat
 ```
 
 ---
