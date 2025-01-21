@@ -4,7 +4,7 @@ A Flutter project.
 
 ## Getting Started
 
-#### Run the application on Vs code or android studio
+#### Run the application on Vs code or android studio | mobile app only
 
 ```bash Linux
 cd flutter-app
