@@ -1,131 +1,152 @@
-# Taxi Stations Pipeline
+# Kafka Taxi Stations Pipeline
 
-Ce projet met en œuvre un pipeline distribué pour la gestion et la visualisation des données Open Data concernant les stations de taxi. Il utilise Apache Kafka, Spring Boot, et Flutter pour fournir un système complet, de l'ingestion des données jusqu'à leur affichage sur une carte interactive.
+> Real-time data pipeline processing Paris taxi station data using Apache Kafka, with a Spring Boot producer, a Kafka Streams processor, a consumer API backed by H2/MySQL, and a Flutter mobile application for visualization.
 
-## **Fonctionnalités**
-- **Ingestion des données Open Data** depuis le site [data.gouv.fr](https://www.data.gouv.fr).
-- **Nettoyage des données** avec OpenRefine.
-- **Service Producteur Kafka** pour envoyer les données dans un topic Kafka.
-- **Service Consommateur Kafka** pour stocker les données dans une base MySQL ou H2.
-- **Service Kafka Streams** pour regrouper et filtrer les données.
-- **Application Flutter** pour afficher les données sur une carte Google Maps.
+![Apache Kafka](https://img.shields.io/badge/Apache_Kafka-231F20?style=for-the-badge&logo=apache-kafka&logoColor=white)
+![Spring Boot](https://img.shields.io/badge/Spring_Boot_3.4-6DB33F?style=for-the-badge&logo=spring-boot&logoColor=white)
+![Java](https://img.shields.io/badge/Java_23-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
+![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)
+![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
 
----
+## Architecture
 
-## **Architecture**
-![Pipeline Architecture](https://via.placeholder.com/800x400?text=Pipeline+Architecture)
+```mermaid
+flowchart LR
+    subgraph DataSource["Data Source"]
+        CSV[bornes-dappel-taxi.csv<br/>Paris Taxi Stations]
+    end
 
-1. **Producteur Kafka** :
-   - Envoie les données du fichier CSV dans le topic `taxi-stations.raw`.
-2. **Kafka Streams** :
-   - Lit les données brutes.
-   - Produit dans :
-     - `stations.grouped.by.status` (regroupement par statut).
-     - `paris.stations` (stations filtrées pour Paris).
-3. **Consommateur Kafka** :
-   - Persiste les données transformées dans MySQL (ou H2 en cas d’échec).
-   - Expose une API RESTful pour accéder aux données.
-4. **Application Flutter** :
-   - Consomme l’API et affiche les données sur Google Maps.
+    subgraph Kafka["Apache Kafka Cluster"]
+        T1[taxi-stations.raw]
+        T2[stations.grouped.by.status]
+        T3[paris.stations]
+    end
 
----
+    subgraph Apps["Spring Boot Microservices"]
+        P[Kafka Producer<br/>CSV → JSON → Kafka]
+        S[Kafka Streams<br/>Filter & Aggregate]
+        C[Kafka Consumer API<br/>REST + H2/MySQL]
+    end
 
-## **Prérequis**
-1. **Kafka** : Installez un serveur Kafka local ([Documentation officielle](https://kafka.apache.org/documentation/)).
-2. **Java 11+** : Nécessaire pour exécuter les services Spring Boot.
-3. **Flutter** : Installez Flutter pour l’application mobile ([Documentation Flutter](https://flutter.dev/docs/get-started)).
-4. **MySQL** : Configurez une base de données MySQL locale.
+    subgraph Mobile["Mobile App"]
+        FL[Flutter App<br/>Taxi Bornes]
+    end
 
----
+    CSV --> P
+    P -->|Produce| T1
+    T1 --> S
+    S -->|Group by status| T2
+    S -->|Filter Paris| T3
+    T1 --> C
+    C -->|REST API| FL
+```
 
-## **Installation**
-### **1. Clonez le Dépôt**
+## Features
+
+- **Kafka Producer**: reads taxi station CSV data, maps to JSON, publishes to `taxi-stations.raw` topic
+- **Kafka Streams**: real-time stream processing — groups stations by status and filters Paris-only stations
+- **Kafka Consumer API**: Spring Boot REST API consuming messages and persisting to H2 or MySQL
+- **Flutter mobile app**: cross-platform application displaying taxi stations with list, detail, and map views
+- **Data preparation**: CSV cleaning and transformation pipeline for raw open data
+
+## Tech Stack
+
+| Category | Technology |
+|----------|-----------|
+| Messaging | Apache Kafka 3.9 |
+| Backend | Spring Boot 3.4, Spring Kafka |
+| Stream Processing | Kafka Streams API |
+| Language (Backend) | Java 23 |
+| Database | H2 (dev) / MySQL (prod) |
+| Mobile | Flutter / Dart |
+| Data Format | CSV → JSON |
+| Build Tool | Maven |
+
+## Getting Started
+
+### Prerequisites
+
+- Java 23+
+- Apache Kafka (local or Docker)
+- Maven 3.8+
+- Flutter SDK (for mobile app)
+
+### Installation
+
 ```bash
-git clone https://github.com/username/taxi-stations-pipeline.git
-cd taxi-stations-pipeline
+git clone https://github.com/g-holali-david/kafka-project.git
+cd kafka-project
+
+# 1. Start Kafka (ZooKeeper + Broker)
+# On Windows:
+.\bin\windows\zookeeper-server-start.bat .\config\zookeeper.properties
+.\bin\windows\kafka-server-start.bat .\config\server.properties
+
+# 2. Create topics
+kafka-topics.sh --create --bootstrap-server localhost:9092 \
+  --topic taxi-stations.raw --partitions 1 --replication-factor 1
+
+# 3. Start the Producer
+cd applications/kafka-producer
+./mvnw spring-boot:run
+
+# 4. Start Kafka Streams processor
+cd ../kafka-streams
+./mvnw spring-boot:run
+
+# 5. Start the Consumer API
+cd ../kafka-consumer-api
+./mvnw spring-boot:run
+
+# 6. Start the Flutter app
+cd ../taxi_bornes_app
+flutter pub get && flutter run
 ```
 
-### **2. Lancez Kafka**
-Assurez-vous que votre serveur Kafka est démarré.
-```bash
-bin/zookeeper-server-start.sh config/zookeeper.properties
-bin/kafka-server-start.sh config/server.properties
+## Project Structure
+
+```
+kafka-project/
+├── applications/
+│   ├── kafka-producer/                # CSV reader → Kafka producer
+│   │   ├── pom.xml
+│   │   └── src/.../kafka_producer/
+│   │       ├── controller/TaxiStationController.java
+│   │       ├── model/TaxiStationCsv.java & TaxiStationJson.java
+│   │       └── service/CsvReader, KafkaSender, TaxiStationMapper
+│   ├── kafka-streams/                 # Stream processing app
+│   │   ├── pom.xml
+│   │   └── src/.../kafka_streams/
+│   │       ├── config/KafkaStreamsConfig.java
+│   │       ├── processor/TaxiStationStreamProcessor.java
+│   │       └── utils/KafkaTopicCreator.java
+│   ├── kafka-consumer-api/            # Consumer + REST API
+│   │   ├── pom.xml
+│   │   └── src/.../kafka_consumer_api/
+│   │       ├── controllers/TaxiStationController.java
+│   │       ├── models/TaxiStationEntity & TaxiStationJson
+│   │       ├── services/KafkaConsumerService.java
+│   │       └── repositories/TaxiStationRepository.java
+│   └── taxi_bornes_app/               # Flutter mobile application
+│       ├── pubspec.yaml
+│       └── lib/
+│           ├── main.dart
+│           ├── screens/               # Home, List, Detail, Map
+│           ├── models/station.dart
+│           └── services/api_service.dart
+├── data-preparation/                  # Raw + cleaned CSV data
+├── project-data/                      # Source datasets
+├── project-files/                     # Reports and presentations
+└── documentation/kafka-doc.md         # Kafka commands reference
 ```
 
-### **3. Configurez MySQL**
-Créez une base de données :
-```sql
-CREATE DATABASE taxi_db;
-```
+## Author
 
-### **4. Démarrez les Services**
-#### Producteur
-```bash
-cd producer
-mvn spring-boot:run
-```
+**Holali David GAVI** — Cloud & DevOps Engineer
+- Portfolio: [hdgavi.dev](https://hdgavi.dev)
+- GitHub: [@g-holali-david](https://github.com/g-holali-david)
+- LinkedIn: [Holali David GAVI](https://www.linkedin.com/in/holali-david-g-4a434631a/)
 
-#### Consommateur
-```bash
-cd consumer
-mvn spring-boot:run
-```
+## License
 
-#### Kafka Streams
-```bash
-cd kafka-streams
-mvn spring-boot:run
-```
-
-#### Application Flutter
-
-```bash Linux
-cd flutter-app
-./runner.sh 
-```
-
-```bash indows
-cd flutter-app
-.\runner.bat
-```
-
----
-
-## **Données**
-### **Source**
-Les données sont disponibles sur le site [data.gouv.fr](https://www.data.gouv.fr).
-
-### **Nettoyage**
-Le fichier `stations-taxi-cleaned.csv` contient les données nettoyées avec OpenRefine.
-
----
-
-## **Endpoints API**
-### **1. Liste des Stations**
-- **URL** : `/api/stations`
-- **Méthode** : GET
-
-### **2. Recherche par ID**
-- **URL** : `/api/stations/{id}`
-- **Méthode** : GET
-
----
-
-## **Contribuer**
-Les contributions sont les bienvenues ! Veuillez suivre ces étapes :
-1. Forkez le dépôt.
-2. Créez une branche (`git checkout -b feature/ma-feature`).
-3. Commitez vos modifications (`git commit -m 'Ajout d’une nouvelle fonctionnalité'`).
-4. Poussez la branche (`git push origin feature/ma-feature`).
-5. Ouvrez une Pull Request.
-
----
-
-## **Licence**
-Ce projet est sous licence MIT. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
-
----
-
-## **Auteurs**
-- **Nom** : GAVI Holali David
-- **GitHub** : https://github.com/g-holali-david
+MIT
